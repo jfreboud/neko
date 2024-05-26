@@ -21,6 +21,9 @@ def eval(
         f"Begin eval with following parameters: device={device}, "
         f"chunks={chunks}, batch_size={batch_size}."
     )
+    plots_dir = Path(__file__).parent.parent.parent / "data" / "out" / "plots"
+    plots_dir.mkdir(parents=True, exist_ok=True)
+
     dataloader = DataLoader(
         dataset=data,
         batch_size=batch_size,
@@ -60,11 +63,7 @@ def eval(
                     for lead in range(12):
                         plt.figure()
                         plt.plot(val[patient, :, lead])
-                        plt.savefig(
-                            Path(
-                                f"~/Downloads/plots/pat{patient}_lead{lead}.png"
-                            ).expanduser()
-                        )
+                        plt.savefig(plots_dir / f"pat{patient}_lead{lead}.png")
                         plt.close()
 
                 val = y1_truth.cpu().numpy()
@@ -73,9 +72,7 @@ def eval(
                         plt.figure()
                         plt.plot(val[patient, :, lead])
                         plt.savefig(
-                            Path(
-                                f"~/Downloads/plots/pat{patient}_lead{lead}_truth.png"
-                            ).expanduser()
+                            plots_dir / f"pat{patient}_lead{lead}_truth.png"
                         )
                         plt.close()
 
