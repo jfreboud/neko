@@ -34,6 +34,11 @@ def train(
         multiprocessing_context=None,
     )
 
+    # checkpoint_path = checkpoints_dir / "epoch8.pth"
+    # checkpoints = torch.load(checkpoint_path, map_location="cpu")
+    # encoder.load_state_dict(checkpoints["encoder_state_dict"])
+    # decoder.load_state_dict(checkpoints["decoder_state_dict"])
+
     encoder.train()
     decoder.train()
     encoder.to(device)
@@ -45,6 +50,7 @@ def train(
         lr=1e-3,
         weight_decay=1e-3,
     )
+    # optimizer.load_state_dict(checkpoints["optimizer_state_dict"])
 
     for epoch in range(nb_epochs):
         epoch_loss = 0.0
@@ -88,18 +94,18 @@ def train(
                 cur_loss = 0
 
         running_loss = epoch_loss / nb_steps
-        logger.info(f"Epoch {epoch+1}/{nb_epochs}, loss: {running_loss}.")
+        logger.info(f"Epoch {epoch + 1}/{nb_epochs}, loss: {running_loss}.")
 
-        checkpoint_path = checkpoints_dir / f"epoch{epoch + 1}.pth"
-        torch.save(
-            {
-                "epoch": epoch + 1,
-                "encoder_state_dict": encoder.state_dict(),
-                "decoder_state_dict": decoder.state_dict(),
-                "optimizer_encoder_state_dict": optimizer.state_dict(),
-                "loss": {running_loss},
-            },
-            checkpoint_path.as_posix(),
-        )
+        # checkpoint_path = checkpoints_dir / f"epoch{epoch + 1 + 8}.pth"
+        # torch.save(
+        #     {
+        #         "epoch": epoch + 1 + 8,
+        #         "encoder_state_dict": encoder.state_dict(),
+        #         "decoder_state_dict": decoder.state_dict(),
+        #         "optimizer_state_dict": optimizer.state_dict(),
+        #         "loss": {running_loss},
+        #     },
+        #     checkpoint_path.as_posix(),
+        # )
 
     logger.info("Training ended successfully.")
