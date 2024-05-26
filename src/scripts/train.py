@@ -2,6 +2,7 @@ import typer
 import torch
 import numpy as np
 from pathlib import Path
+from loguru import logger
 from typing_extensions import Annotated
 
 from neko.train import train
@@ -31,6 +32,10 @@ def main_train(
         ModelComplexity, typer.Option("--model", help="Model config to train.")
     ],
 ):
+    logger.info(
+        f"Main training launched with following parameters: device={device}, "
+        f"model_config={model_config}."
+    )
     data = ECGDataset(path=database_path, sampling_rate=100)
 
     # Split data into train and test.
@@ -48,6 +53,7 @@ def main_train(
 
     torch.save(encoder.state_dict(), encoder_path.expanduser())
     torch.save(decoder.state_dict(), decoder_path.expanduser())
+    logger.info("Main training ended successfully.")
 
 
 if __name__ == "__main__":

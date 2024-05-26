@@ -2,6 +2,7 @@ import typer
 import torch
 import numpy as np
 from pathlib import Path
+from loguru import logger
 from typing_extensions import Annotated
 
 from neko.eval import eval
@@ -33,6 +34,10 @@ def main_eval(
         ModelComplexity, typer.Option("--model", help="Model config to run.")
     ],
 ):
+    logger.info(
+        f"Main eval launched with following parameters: device={device}, "
+        f"model_config={model_config}."
+    )
     data = ECGDataset(path=database_path, sampling_rate=100)
 
     # Split data into train and test.
@@ -54,6 +59,7 @@ def main_eval(
     )
 
     eval(data=data_test, encoder=encoder, decoder=decoder, device=device)
+    logger.info("Main eval ended successfully.")
 
 
 if __name__ == "__main__":

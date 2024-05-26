@@ -1,6 +1,7 @@
 import torch
 from tqdm import tqdm
 from pathlib import Path
+from loguru import logger
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
@@ -16,6 +17,10 @@ def eval(
     chunks: int = 10,
     batch_size: int = 32,
 ):
+    logger.info(
+        f"Begin eval with following parameters: device={device}, "
+        f"chunks={chunks}, batch_size={batch_size}."
+    )
     dataloader = DataLoader(
         dataset=data,
         batch_size=batch_size,
@@ -77,3 +82,5 @@ def eval(
                 loss = criterion(y1, y1_truth)
                 loss_value = loss.item()
                 print(loss_value)
+
+    logger.info("Eval ended successfully.")
