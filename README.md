@@ -6,7 +6,15 @@
 
 <!-- TOC -->
   * [Installation](#installation)
-  * [Getting started](#getting-started)
+  * [Getting Started](#getting-started)
+    * [Train an Encoder and a Decoder](#train-an-encoder-and-a-decoder)
+    * [Evaluate the 2 Models](#evaluate-the-2-models)
+  * [Personal Wandering](#personal-wandering)
+  * [Results](#results)
+    * [Training](#training)
+    * [Some Sanity Checks](#some-sanity-checks)
+    * [Generation from Style](#generation-from-style)
+  * [Next Steps](#next-steps)
 <!-- TOC -->
 
 ## Installation
@@ -30,7 +38,7 @@ Go to the `src` subdirectory and install the `neko` library:
 poetry install
 ````
 
-## Getting started
+## Getting Started
 
 ### Train an Encoder and a Decoder
 
