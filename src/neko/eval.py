@@ -51,6 +51,9 @@ def eval(
             X = X.to(device)
             y_truth = X.clone().detach()
 
+            batch_dir = plots_dir / "0"
+            batch_dir.mkdir(parents=True, exist_ok=True)
+
             seq = X.shape[1] // chunks
             for chunk in range(chunks):
                 X1 = X[:, chunk * seq : (chunk + 1) * seq, :]
@@ -61,7 +64,7 @@ def eval(
 
                 h1 = encoder(X1)
                 # h1 = torch.zeros_like(h1)
-                # h1[:, 0] = 0.25  # 0.5
+                # h1[:, 0] = 0.001
 
                 y1 = generate(
                     nb_points=y1_truth.shape[1],
@@ -70,11 +73,8 @@ def eval(
                     decoder=decoder,
                 )
 
-                batch_dir = plots_dir / f"{chunk}"
-                batch_dir.mkdir(parents=True, exist_ok=True)
-
                 val = y1.detach().cpu().numpy()
-                for patient in range(3):
+                for patient in range(5):
                     for lead in range(4):
                         plt.figure()
                         plt.plot(val[patient, :, lead])
@@ -82,7 +82,7 @@ def eval(
                         plt.close()
 
                 val = y1_truth.cpu().numpy()
-                for patient in range(3):
+                for patient in range(5):
                     for lead in range(4):
                         plt.figure()
                         plt.plot(val[patient, :, lead])
@@ -94,6 +94,7 @@ def eval(
                 loss = criterion(y1, y1_truth)
                 loss_value = loss.item()
                 logger.info(f"Loss: {loss_value}")
+                break
             break
 
     logger.info("Eval ended successfully.")
