@@ -8,7 +8,7 @@
   * [Installation](#installation)
   * [Getting Started](#getting-started)
     * [Train an Encoder and a Decoder](#train-an-encoder-and-a-decoder)
-    * [Evaluate the 2 Models](#evaluate-the-2-models)
+    * [Evaluate the Encoder](#evaluate-the-encoder)
   * [Personal Wandering](#personal-wandering)
   * [Results](#results)
     * [Training](#training)
@@ -40,14 +40,24 @@ poetry install
 
 ## Getting Started
 
+Be sure to be in the `neko` conda environment (see [previous paragraph](#installation)):
+
+```shell
+conda activate neko
+```
+
 ### Train an Encoder and a Decoder
 
-First, train 2 models: an encoder and a decoder.
+First, we train 2 models: an encoder and a decoder.
 The encoder is trained to encode a temporal signal into a vector.
 The decoder is trained to decode a temporal signal out of a vector.
 
-The 2 systems are trained end to end in a generative way.
-To launch the training, go to the `script` subdirectory and execute the command:
+The encoder model is the important model.
+The decoder is the "head" that helps training the encoder. Plus, it will
+enable some interpretability features (see [later](#personal-wandering)).
+
+The 2 models are trained end to end in a generative way.
+To launch the training, go to the `src/script` subdirectory and execute the command:
 
 ```shell
 python train.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3/ptbxl_database.csv --encoder ../../weights/encoder.pt --decoder ../../weights/decoder.pt --device mps --model small
@@ -56,13 +66,13 @@ python train.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardio
 `--db`: the input dataset of ECGs. \
 `--encoder`: the path to save the encoder model to the disk. \
 `--decoder`: the path to save the decoder model to the disk. \
-`--device`: the device used to train the models (I tested mps on MacOS or cuda elsewhere). \
+`--device`: the device used to train the models (I tested mps on MacOS). \
 `--model`: the model config to train.
 
-### Evaluate the 2 Models
+### Evaluate the Encoder
 
-In order to evaluate the quality of the 2 models,
-go to the `script` subdirectory and execute the command:
+In order to evaluate the quality of the encoder model,
+go to the `src/script` subdirectory and execute the command:
 
 ```shell
 python eval.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3/ptbxl_database.csv --encoder ../../weights/encoder.pt --decoder ../../weights/decoder.pt --device mps --model small
@@ -71,8 +81,12 @@ python eval.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiog
 `--db`: the input dataset of ECGs. \
 `--encoder`: the path to load the encoder model from the disk. \
 `--decoder`: the path to load the decoder model from the disk. \
-`--device`: the device used to run the models (I tested mps on MacOS or cuda elsewhere). \
+`--device`: the device used to run the models (I tested mps on MacOS). \
 `--model`: the model config to run.
+
+The command will encode the style of the input ECGs and then decode the style
+in order to generate an ECG.
+Ideally the generated ECG should be the same as the original one.
 
 ## Personal Wandering
 
@@ -82,10 +96,10 @@ the 12-lead electrocardiograms:
 - in the following I focus on the 100Hz ECGs.
 
 In order to create patients' partitions, my plan was the following:
-1. for each patient, encode the 12-lead timeseries into a vector
+1. for each patient, encode the 12-lead timeseries into features vectors
 2. run the K means clustering on the previous vectors
 
-The principal difficulty seemed to encode the features vector.
+The principal difficulty seemed to encode the features vectors.
 I thought about using the triplet loss:
 1. sample an anchor features' vector from patient A,
 a positive features' vector from the same patient A
@@ -98,29 +112,36 @@ I also thought about
 The 12 timeseries of the ECG could be modulated by the features vector previously mentioned.
 This seemed relevant because:
 1. a generative learning approach could train the models more effectively compared to GAN
-2. build interpretability by design: the features' vector (the style)
+2. the system would be interpretable by design: the features' vector (the style)
 can be decoded into the original timeseries
-3. once the features' vector can be decoded, we may explore the modifications of the style
+3. once the features' vector can be decoded, we may explore small modifications of the style
 
 In order to implement this idea, I had to figure out a way to make the style vector
 distill information to the different layers of the decoder. But this is
-already what the Transformers do in their Attention layers: the style vector may
-only be concatenated before the beginning of the `seq` dimension of the timeseries
-and the model will learn how to use it thanks to the queries and keys of the Attention layers.
+already what the `Transformers` do in their `Attention` layers: the style vector may
+only be concatenated before the beginning of the `seq` dimension
+and the model will learn how to use it thanks to the `queries` and `keys` of the `Attention` layers.
 
 I have tried to limit memory consumption during the training.
 In order to do so, I split the different timeseries in 10 chunks of 1s each.
-This is because the computation of the attention scores in the Transformers
-make memory grow in o(N^2) of `seq` dimension.
+This is because the computation of the attention `scores` in the `Transformers`
+makes memory grow along o(N^2) of `seq` dimension.
 
 ## Results
 
 ### Training
 
+The small model config has been trained for 4 epochs.
+It lasted around 2 hours on a MacBook with M3Max.
+The loss came from 1.816 to 0.056 but did not converge yet.
+
 <figure>
 <img src="data/in/small_4epochs.png">
 <figcaption>Training small encoder and decoder for 4 epochs</figcaption>
 </figure>
+
+The large model config has been trained for 12 epochs.
+Its final loss was 0.028, this model did not converge either.
 
 ### Some Sanity Checks
 
@@ -136,6 +157,9 @@ Given some style vector repeated in a batch, the generated curves of the 12-lead
 also repeated (but each timeseries inside the 12-lead is different).
 
 ### Generation from Style
+
+Here are some curves that have been generated by the encoder and the decoder.
+We may compare them to the ground truth.
 
 <figure float="left">
   <img src="data/in/pat4_lead1.png" width="150" />
@@ -159,13 +183,32 @@ also repeated (but each timeseries inside the 12-lead is different).
   <figcaption>Ground truth</figcaption>
 </figure>
 
+We can see that the generated curves are not the same as the ground truth.
+
+This may come from the structure of the encoder.
+The encoder is composed of `Convolutions` of small kernels. These kernels
+may capture patterns that arise at different timings inside the `seq` dimension.
+
+Hence, in the curves above, we can recognize similar elements between
+the ground truth seem and the generated curves.
+
+In order to better preserve the shape of the timeseries, we should rework the
+encoder with less moving parts.
+
+As a conclusion, the methodology put in place seems very interesting
+to give an idea of what the encoder is able to capture or not.
+
 ## Next Steps
 
-1. implement K means clustering
+1. test a new architecture for the encoder
+   1. try to increase the filters of the `Convolutions`
+   2. modify the `avgpool`
+
+2. implement K means clustering
    1. keep the split of the timeseries
    2. check if the different chunks of same patient are in the same cluster
 
-2. train a classifier of one clinical data:
+3. train a classifier of one clinical data:
    1. use the `diagnostic_class` given in `example_physionet.py`
    2. try to balance the number of patients for each class or use a weighted loss
    3. take the features' vector as input
