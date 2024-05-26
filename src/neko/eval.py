@@ -56,28 +56,38 @@ def eval(
                 X1 = X[:, chunk * seq : (chunk + 1) * seq, :]
                 y1_truth = y_truth[:, chunk * seq : (chunk + 1) * seq, :]
 
-                y1 = generate(X1, encoder=encoder, decoder=decoder)
+                h1 = encoder(X1)
+                y1 = generate(
+                    nb_points=y1_truth.shape[1],
+                    curve=X1[:, :1, :],
+                    h=h1,
+                    decoder=decoder,
+                )
+
+                batch_dir = plots_dir / f"{chunk}"
+                batch_dir.mkdir(parents=True, exist_ok=True)
 
                 val = y1.detach().cpu().numpy()
-                for patient in range(1):
-                    for lead in range(12):
+                for patient in range(3):
+                    for lead in range(4):
                         plt.figure()
                         plt.plot(val[patient, :, lead])
-                        plt.savefig(plots_dir / f"pat{patient}_lead{lead}.png")
+                        plt.savefig(batch_dir / f"pat{patient}_lead{lead}.png")
                         plt.close()
 
                 val = y1_truth.cpu().numpy()
-                for patient in range(1):
-                    for lead in range(12):
+                for patient in range(3):
+                    for lead in range(4):
                         plt.figure()
                         plt.plot(val[patient, :, lead])
                         plt.savefig(
-                            plots_dir / f"pat{patient}_lead{lead}_truth.png"
+                            batch_dir / f"pat{patient}_lead{lead}_truth.png"
                         )
                         plt.close()
 
                 loss = criterion(y1, y1_truth)
                 loss_value = loss.item()
-                print(loss_value)
+                logger.info(f"Loss: {loss_value}")
+            break
 
     logger.info("Eval ended successfully.")
