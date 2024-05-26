@@ -55,11 +55,17 @@ def eval(
             for chunk in range(chunks):
                 X1 = X[:, chunk * seq : (chunk + 1) * seq, :]
                 y1_truth = y_truth[:, chunk * seq : (chunk + 1) * seq, :]
+                zero = torch.zeros(
+                    (X1.shape[0], 1, X1.shape[2]), device=X1.device
+                )
 
                 h1 = encoder(X1)
+                # h1 = torch.zeros_like(h1)
+                # h1[:, 0] = 0.25  # 0.5
+
                 y1 = generate(
                     nb_points=y1_truth.shape[1],
-                    curve=X1[:, :1, :],
+                    curve=zero,  # X1[:, :10, :]
                     h=h1,
                     decoder=decoder,
                 )
