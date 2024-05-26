@@ -1,4 +1,5 @@
 import torch
+from typing import List
 from dataclasses import dataclass
 
 
@@ -30,12 +31,7 @@ class Bottleneck(torch.nn.Module):
 
     expansion: int = 4
 
-    def __init__(
-        self,
-        inplanes: int,
-        planes: int,
-        stride: int = 1
-    ) -> None:
+    def __init__(self, inplanes: int, planes: int, stride: int = 1) -> None:
         super().__init__()
 
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
@@ -80,8 +76,8 @@ class Bottleneck(torch.nn.Module):
 
 @dataclass
 class ResNetArgs:
-    planes: [int]
-    blocks: [int]
+    planes: List[int]
+    blocks: List[int]
 
 
 class ResNet(torch.nn.Module):
@@ -126,11 +122,7 @@ class ResNet(torch.nn.Module):
     ) -> torch.nn.Sequential:
         layers = []
         layers.append(
-            Bottleneck(
-                inplanes=self.inplanes,
-                planes=planes,
-                stride=stride
-            )
+            Bottleneck(inplanes=self.inplanes, planes=planes, stride=stride)
         )
 
         self.inplanes = planes * Bottleneck.expansion

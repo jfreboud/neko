@@ -38,28 +38,28 @@ def eval(
             unit="batch",
             colour="green",
             mininterval=10,
-            maxinterval=60
+            maxinterval=60,
         ):
             X = X.to(device)
             y_truth = X.clone().detach()
 
             seq = X.shape[1] // chunks
             for chunk in range(chunks):
-                X1 = X[:, chunk * seq: (chunk+1) * seq, :]
-                y1_truth = y_truth[:, chunk * seq: (chunk+1) * seq, :]
+                X1 = X[:, chunk * seq : (chunk + 1) * seq, :]
+                y1_truth = y_truth[:, chunk * seq : (chunk + 1) * seq, :]
 
-                y1 = generate(
-                    X1,
-                    encoder=encoder,
-                    decoder=decoder
-                )
+                y1 = generate(X1, encoder=encoder, decoder=decoder)
 
                 val = y1.detach().cpu().numpy()
                 for patient in range(1):
                     for lead in range(12):
                         plt.figure()
                         plt.plot(val[patient, :, lead])
-                        plt.savefig(Path(f"~/Downloads/plots/pat{patient}_lead{lead}.png").expanduser())
+                        plt.savefig(
+                            Path(
+                                f"~/Downloads/plots/pat{patient}_lead{lead}.png"
+                            ).expanduser()
+                        )
                         plt.close()
 
                 val = y1_truth.cpu().numpy()
@@ -67,7 +67,11 @@ def eval(
                     for lead in range(12):
                         plt.figure()
                         plt.plot(val[patient, :, lead])
-                        plt.savefig(Path(f"~/Downloads/plots/pat{patient}_lead{lead}_truth.png").expanduser())
+                        plt.savefig(
+                            Path(
+                                f"~/Downloads/plots/pat{patient}_lead{lead}_truth.png"
+                            ).expanduser()
+                        )
                         plt.close()
 
                 loss = criterion(y1, y1_truth)

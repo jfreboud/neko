@@ -3,8 +3,16 @@ import torch
 
 
 class Preprocess(torch.nn.Module):
-    def __init__(self, normalize, remove_baseline, remove_hf_noise, result_only=True,
-                 should_pre_transpose=False, *args, **kwargs):
+    def __init__(
+        self,
+        normalize,
+        remove_baseline,
+        remove_hf_noise,
+        result_only=True,
+        should_pre_transpose=False,
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
         self.transforms = []
         self.result_only = result_only
@@ -27,7 +35,7 @@ class Preprocess(torch.nn.Module):
     @classmethod
     def f_remove_hf_noise(cls, signal):
         level = 4
-        wavelet = 'db4'
+        wavelet = "db4"
         initial_signal = signal.reshape(-1, signal.shape[-1])
 
         coeffs = ptwt.wavedec(initial_signal, wavelet, level=level)
@@ -47,64 +55,72 @@ class Preprocess(torch.nn.Module):
     def calculate_baseline(cls, signal):
         initial_signal = signal.detach().clone().reshape(-1, signal.shape[-1])
 
-        ssd_shape = (initial_signal.shape[0], )
+        ssd_shape = (initial_signal.shape[0],)
 
-        generations = [{
-            'signal': initial_signal,
-            'mask': torch.ones(initial_signal.shape[0], dtype=torch.bool, device=signal.device)
-        }]
+        generations = [
+            {
+                "signal": initial_signal,
+                "mask": torch.ones(
+                    initial_signal.shape[0],
+                    dtype=torch.bool,
+                    device=signal.device,
+                ),
+            }
+        ]
 
         current_iter = 0
 
         while True:
-            sig = generations[-1]['signal']
-            lp, hp = ptwt.wavedec(sig, 'db4', level=1)
+            sig = generations[-1]["signal"]
+            lp, hp = ptwt.wavedec(sig, "db4", level=1)
             new_ssd = torch.zeros(ssd_shape, device=signal.device)
-            new_ssd[generations[-1]['mask']] = torch.sum(hp ** 2, dim=-1)
-            generations[-1]['ssd'] = new_ssd
+            new_ssd[generations[-1]["mask"]] = torch.sum(hp**2, dim=-1)
+            generations[-1]["ssd"] = new_ssd
 
             if len(generations) >= 3:
                 newly_stopped = torch.logical_and(
                     torch.gt(
-                        generations[-3]['ssd'][generations[-1]['mask']],
-                        generations[-2]['ssd'][generations[-1]['mask']],
+                        generations[-3]["ssd"][generations[-1]["mask"]],
+                        generations[-2]["ssd"][generations[-1]["mask"]],
                     ),
                     torch.lt(
-                        generations[-2]['ssd'][generations[-1]['mask']],
-                        generations[-1]['ssd'][generations[-1]['mask']],
+                        generations[-2]["ssd"][generations[-1]["mask"]],
+                        generations[-1]["ssd"][generations[-1]["mask"]],
                     ),
                 )
 
-                if torch.all(newly_stopped) or lp.shape[-1] < 8 or current_iter > 7:
+                if (
+                    torch.all(newly_stopped)
+                    or lp.shape[-1] < 8
+                    or current_iter > 7
+                ):
                     break
 
                 new_sig = lp[~newly_stopped]
-                new_mask = torch.clone(generations[-1]['mask'])
-                new_mask[generations[-1]['mask']] = ~newly_stopped
+                new_mask = torch.clone(generations[-1]["mask"])
+                new_mask[generations[-1]["mask"]] = ~newly_stopped
 
-                generations.append({
-                    'signal': new_sig,
-                    'mask': new_mask
-                })
+                generations.append({"signal": new_sig, "mask": new_mask})
             else:
-                generations.append({
-                    'signal': lp,
-                    'mask': generations[-1]['mask']
-                })
+                generations.append(
+                    {"signal": lp, "mask": generations[-1]["mask"]}
+                )
 
             current_iter += 1
 
         for i in range(len(generations) - 2, -1, -1):
-            lp = generations[i + 1]['signal']
-            sig = generations[i]['signal']
+            lp = generations[i + 1]["signal"]
+            sig = generations[i]["signal"]
 
-            recovered = ptwt.waverec([lp, torch.zeros_like(lp)], 'db4')
+            recovered = ptwt.waverec([lp, torch.zeros_like(lp)], "db4")
             if recovered.shape[-1] == sig.shape[-1] + 1:
                 recovered = recovered[..., :-1]
 
-            mask_diff = generations[i + 1]['mask'][generations[i]['mask']]  # massive tricks omg (or maskive?)
+            mask_diff = generations[i + 1]["mask"][
+                generations[i]["mask"]
+            ]  # massive tricks omg (or maskive?)
             sig[mask_diff] = recovered
-        baseline = generations[0]['signal'].reshape(*signal.shape)
+        baseline = generations[0]["signal"].reshape(*signal.shape)
         return baseline
 
     @classmethod

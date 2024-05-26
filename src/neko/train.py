@@ -13,7 +13,7 @@ def train(
     device: str,
     chunks: int = 10,
     batch_size: int = 32,
-    nb_epochs: int = 4
+    nb_epochs: int = 4,
 ):
     dataloader = DataLoader(
         dataset=data,
@@ -51,7 +51,7 @@ def train(
             unit="batch",
             colour="green",
             mininterval=10,
-            maxinterval=60
+            maxinterval=60,
         ):
             optimizer1.zero_grad()
             optimizer2.zero_grad()
@@ -61,8 +61,8 @@ def train(
 
             seq = X.shape[1] // chunks
             for chunk in range(chunks):
-                X1 = X[:, chunk * seq: (chunk+1) * seq, :]
-                y1 = y[:, chunk * seq: (chunk+1) * seq, :]
+                X1 = X[:, chunk * seq : (chunk + 1) * seq, :]
+                y1 = y[:, chunk * seq : (chunk + 1) * seq, :]
                 y1 = y1[:, 1:, :]
                 X1 = X1[:, :-1, :]
 

@@ -1,4 +1,3 @@
-import torch
 import pandas as pd
 import numpy as np
 import wfdb
@@ -8,12 +7,12 @@ import matplotlib.pyplot as plt
 
 def load_raw_data(df, sampling_rate, path):
     if sampling_rate == 100:
-        data = [wfdb.rdsamp(path+df.filename_lr.iloc[0])]
-        data += [wfdb.rdsamp(path+df.filename_lr.iloc[1])]
-        data += [wfdb.rdsamp(path+df.filename_lr.iloc[2])]
+        data = [wfdb.rdsamp(path + df.filename_lr.iloc[0])]
+        data += [wfdb.rdsamp(path + df.filename_lr.iloc[1])]
+        data += [wfdb.rdsamp(path + df.filename_lr.iloc[2])]
         # data = [wfdb.rdsamp(path+f) for f in df.filename_lr]
     else:
-        data = [wfdb.rdsamp(path+f) for f in df.filename_hr]
+        data = [wfdb.rdsamp(path + f) for f in df.filename_hr]
     data = np.array([signal for signal, meta in data])
     return data
 
@@ -31,26 +30,26 @@ if __name__ == "__main__":
     sampling_rate = 100
 
     # load and convert annotation data
-    Y = pd.read_csv(path+'ptbxl_database.csv', index_col='ecg_id')
+    Y = pd.read_csv(path + "ptbxl_database.csv", index_col="ecg_id")
     Y.scp_codes = Y.scp_codes.apply(lambda x: ast.literal_eval(x))
 
     # Load raw signal data
     X = load_raw_data(Y, sampling_rate, path)
 
-    """val = X.numpy()
+    val = X.numpy()
     for patient in range(3):
         for lead in range(12):
             plt.figure()
             plt.plot(val[patient, :, lead])
             plt.savefig(f"pat{patient}_lead{lead}.png")
-            plt.close()"""
+            plt.close()
 
     # Load scp_statements.csv for diagnostic aggregation
-    agg_df = pd.read_csv(path+'scp_statements.csv', index_col=0)
+    agg_df = pd.read_csv(path + "scp_statements.csv", index_col=0)
     agg_df = agg_df[agg_df.diagnostic == 1]
 
     # Apply diagnostic superclass
-    Y['diagnostic_superclass'] = Y.scp_codes.apply(aggregate_diagnostic)
+    Y["diagnostic_superclass"] = Y.scp_codes.apply(aggregate_diagnostic)
 
     # Split data into train and test
     test_fold = 10
