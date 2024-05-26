@@ -28,7 +28,7 @@ TRANSFORMER_SMALL = TransformerArgs(
     hidden_dim=9092,
     n_heads=4,
     n_leads=12,
-    embedding_dim=512
+    embedding_dim=512,
 )
 TRANSFORMER_LARGE = TransformerArgs(
     dim=1024,
@@ -37,7 +37,7 @@ TRANSFORMER_LARGE = TransformerArgs(
     hidden_dim=9092,
     n_heads=8,
     n_leads=12,
-    embedding_dim=2048
+    embedding_dim=2048,
 )
 TRANSFORMER_XLARGE = TransformerArgs(
     dim=1024,
@@ -46,31 +46,31 @@ TRANSFORMER_XLARGE = TransformerArgs(
     hidden_dim=9092,
     n_heads=8,
     n_leads=12,
-    embedding_dim=2048
+    embedding_dim=2048,
 )
 
 RESNET_ARGS = {
     ModelComplexity.SMALL: RESNET_SMALL,
-    ModelComplexity.LARGE: RESNET_LARGE
+    ModelComplexity.LARGE: RESNET_LARGE,
 }
 
 TRANSFORMER_ARGS = {
     ModelComplexity.SMALL: TRANSFORMER_SMALL,
     ModelComplexity.LARGE: TRANSFORMER_LARGE,
-    ModelComplexity.XLARGE: TRANSFORMER_XLARGE
+    ModelComplexity.XLARGE: TRANSFORMER_XLARGE,
 }
 
 MODEL_ARGS = {
     ModelComplexity.SMALL: {
         "encoder": RESNET_ARGS[ModelComplexity.SMALL],
-        "decoder": TRANSFORMER_ARGS[ModelComplexity.SMALL]
+        "decoder": TRANSFORMER_ARGS[ModelComplexity.SMALL],
     },
     ModelComplexity.LARGE: {
         "encoder": RESNET_ARGS[ModelComplexity.LARGE],
-        "decoder": TRANSFORMER_ARGS[ModelComplexity.LARGE]
+        "decoder": TRANSFORMER_ARGS[ModelComplexity.LARGE],
     },
     ModelComplexity.XLARGE: {
         "encoder": RESNET_ARGS[ModelComplexity.LARGE],
-        "decoder": TRANSFORMER_ARGS[ModelComplexity.XLARGE]
+        "decoder": TRANSFORMER_ARGS[ModelComplexity.XLARGE],
     },
 }

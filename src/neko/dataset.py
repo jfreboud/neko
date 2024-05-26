@@ -28,7 +28,7 @@ class ECGDataset(Dataset):
         self,
         path: Path,
         sampling_rate: int,
-        df: Optional[pandas.DataFrame] = None
+        df: Optional[pandas.DataFrame] = None,
     ):
         self.path = path.expanduser()
         self.dir = self.path.parent
@@ -40,14 +40,12 @@ class ECGDataset(Dataset):
         if df is not None:
             self.df = df
         else:
-            self.df = pd.read_csv(path, index_col='ecg_id')
+            self.df = pd.read_csv(path, index_col="ecg_id")
 
-    def filter(self, indices: np.ndarray) -> 'ECGDataset':
+    def filter(self, indices: np.ndarray) -> "ECGDataset":
         df = self.df.iloc[indices]
         return ECGDataset(
-            path=self.path,
-            sampling_rate=self.sampling_rate,
-            df=df
+            path=self.path, sampling_rate=self.sampling_rate, df=df
         )
 
     def __len__(self):
@@ -70,9 +68,13 @@ class ECGDataset(Dataset):
         A tensor containing the image loaded and transformed.
         """
         if self.sampling_rate == 100:
-            data, _ = wfdb.rdsamp((self.dir / self.df.filename_lr.iloc[item]).as_posix())
+            data, _ = wfdb.rdsamp(
+                (self.dir / self.df.filename_lr.iloc[item]).as_posix()
+            )
         else:
-            data, _ = wfdb.rdsamp((self.dir / self.df.filename_hr.iloc[item]).as_posix())
+            data, _ = wfdb.rdsamp(
+                (self.dir / self.df.filename_hr.iloc[item]).as_posix()
+            )
 
         X = torch.Tensor(data)
         X = self.preprocess(X)

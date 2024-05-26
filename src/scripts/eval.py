@@ -2,6 +2,7 @@ import typer
 import torch
 import numpy as np
 from pathlib import Path
+from loguru import logger
 from typing_extensions import Annotated
 
 from neko.eval import eval
@@ -13,16 +14,31 @@ from config import TEST_FOLDS, MODEL_ARGS, ModelComplexity
 
 
 def main_eval(
-    database_path: Annotated[Path, typer.Option("--db", help="Path to the PTXL database.")],
-    encoder_path: Annotated[Path, typer.Option("--encoder", help="Path to load the encoder from the disk.")],
-    decoder_path: Annotated[Path, typer.Option("--decoder", help="Path to load the decoder from the disk.")],
+    database_path: Annotated[
+        Path, typer.Option("--db", help="Path to the PTXL database.")
+    ],
+    encoder_path: Annotated[
+        Path,
+        typer.Option(
+            "--encoder", help="Path to load the encoder from the disk."
+        ),
+    ],
+    decoder_path: Annotated[
+        Path,
+        typer.Option(
+            "--decoder", help="Path to load the decoder from the disk."
+        ),
+    ],
     device: Annotated[str, typer.Option(help="Device used to run the models.")],
-    model_config: Annotated[ModelComplexity, typer.Option("--model", help="Model config to run.")]
+    model_config: Annotated[
+        ModelComplexity, typer.Option("--model", help="Model config to run.")
+    ],
 ):
-    data = ECGDataset(
-        path=database_path,
-        sampling_rate=100
+    logger.info(
+        f"Main eval launched with following parameters: device={device}, "
+        f"model_config={model_config}."
     )
+    data = ECGDataset(path=database_path, sampling_rate=100)
 
     # Split data into train and test.
     test_folds = TEST_FOLDS
@@ -38,16 +54,12 @@ def main_eval(
     encoder.load_state_dict(
         torch.load(encoder_path.expanduser(), map_location="cpu")
     )
-    decoder.load_state_dict(torch.load(
-        decoder_path.expanduser(), map_location="cpu")
+    decoder.load_state_dict(
+        torch.load(decoder_path.expanduser(), map_location="cpu")
     )
 
-    eval(
-        data=data_test,
-        encoder=encoder,
-        decoder=decoder,
-        device=device
-    )
+    eval(data=data_test, encoder=encoder, decoder=decoder, device=device)
+    logger.info("Main eval ended successfully.")
 
 
 if __name__ == "__main__":

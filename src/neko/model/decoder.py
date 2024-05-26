@@ -112,10 +112,7 @@ class Attention(torch.nn.Module):
 
     @staticmethod
     def create_rotation_matrix(
-        positions: torch.Tensor,
-        embedding_dim: int,
-        rope_theta: float,
-        device
+        positions: torch.Tensor, embedding_dim: int, rope_theta: float, device
     ) -> torch.Tensor:
         """
         Generate the rotary matrix for RoPE.
@@ -138,7 +135,7 @@ class Attention(torch.nn.Module):
         R = torch.zeros(
             (len(positions), embedding_dim, embedding_dim),
             requires_grad=False,
-            device=device
+            device=device,
         )
         # positions = torch.arange(1, context_len+1).unsqueeze(1)
         # Create matrix theta (shape: context_len, embedding_dim // 2).
@@ -149,10 +146,10 @@ class Attention(torch.nn.Module):
         cos_values = torch.cos(m_theta)
         sin_values = torch.sin(m_theta)
         # Populate the rotary matrix R using 2D slicing.
-        R[:, 2*slice_i, 2*slice_i] = cos_values
-        R[:, 2*slice_i, 2*slice_i+1] = -sin_values
-        R[:, 2*slice_i+1, 2*slice_i] = sin_values
-        R[:, 2*slice_i+1, 2*slice_i+1] = cos_values
+        R[:, 2 * slice_i, 2 * slice_i] = cos_values
+        R[:, 2 * slice_i, 2 * slice_i + 1] = -sin_values
+        R[:, 2 * slice_i + 1, 2 * slice_i] = sin_values
+        R[:, 2 * slice_i + 1, 2 * slice_i + 1] = cos_values
         return R
 
     def forward(
@@ -186,15 +183,9 @@ class Attention(torch.nn.Module):
         queries, keys, values = self.wq(x), self.wk(x), self.wv(x)
 
         # Prepare the queries, keys and values for the attention computation.
-        queries = queries.reshape(
-            B, L, self.n_heads, -1
-        ).transpose(1, 2)
-        keys = keys.reshape(
-            B, L, self.n_heads, -1
-        ).transpose(1, 2)
-        values = values.reshape(
-            B, L, self.n_heads, -1
-        ).transpose(1, 2)
+        queries = queries.reshape(B, L, self.n_heads, -1).transpose(1, 2)
+        keys = keys.reshape(B, L, self.n_heads, -1).transpose(1, 2)
+        values = values.reshape(B, L, self.n_heads, -1).transpose(1, 2)
 
         if cache is not None:
             key_cache, value_cache = cache
@@ -212,9 +203,9 @@ class Attention(torch.nn.Module):
         scores = torch.matmul(queries, keys.transpose(2, 3)) * self.scale
         if mask is not None:
             scores += mask
-        scores = torch.softmax(
-            scores.type(torch.float32), dim=-1
-        ).type_as(scores)
+        scores = torch.softmax(scores.type(torch.float32), dim=-1).type_as(
+            scores
+        )
 
         output = torch.matmul(scores, values)  # (B, n_local_heads, L, head_dim)
         output = output.transpose(1, 2).contiguous().reshape(B, L, -1)
@@ -282,8 +273,7 @@ class TransformerBlock(torch.nn.Module):
         rotation_matrix: torch.Tensor,
         mask: Optional[torch.Tensor] = None,
         cache: Optional[
-            Tuple[torch.Tensor,
-                  Optional[Tuple[torch.Tensor, torch.Tensor]]]
+            Tuple[torch.Tensor, Optional[Tuple[torch.Tensor, torch.Tensor]]]
         ] = None,
     ) -> Tuple[torch.Tensor, Optional[Tuple[torch.Tensor, torch.Tensor]]]:
         """
@@ -309,7 +299,7 @@ class TransformerBlock(torch.nn.Module):
             self.attention_norm(x),
             rotation_matrix=rotation_matrix,
             mask=mask,
-            cache=cache
+            cache=cache,
         )
         h = x + r
         r = self.feed_forward(self.ffn_norm(h))
@@ -331,17 +321,15 @@ class Transformer(torch.nn.Module):
         super().__init__()
         self.args = args
         self.n_layers = args.n_layers
-        self.input = torch.nn.Linear(
-            args.n_leads, args.dim, bias=False
-        )
+        self.input = torch.nn.Linear(args.n_leads, args.dim, bias=False)
         self.embedding = torch.nn.Linear(
             args.embedding_dim, args.dim, bias=False
         )
         self.norm = RMSNorm(args.dim, eps=args.norm_eps)
         self.output = torch.nn.Linear(args.dim, 12, bias=False)
-        self.layers = torch.nn.ModuleList([
-            TransformerBlock(args=args) for _ in range(args.n_layers)
-        ])
+        self.layers = torch.nn.ModuleList(
+            [TransformerBlock(args=args) for _ in range(args.n_layers)]
+        )
 
     def forward(
         self,
@@ -398,15 +386,12 @@ class Transformer(torch.nn.Module):
             positions=positions,
             embedding_dim=self.args.head_dim,
             rope_theta=self.args.rope_theta,
-            device=h.device
+            device=h.device,
         )
 
         for e, layer in enumerate(self.layers):
             h, cache[e] = layer(
-                h,
-                rotation_matrix=rotation_matrix,
-                mask=mask,
-                cache=cache[e]
+                h, rotation_matrix=rotation_matrix, mask=mask, cache=cache[e]
             )
 
         if h1 is not None:

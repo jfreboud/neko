@@ -2,25 +2,27 @@ import torch
 
 
 def generate(
-    X: torch.Tensor,
-    encoder: torch.nn.Module,
-    decoder: torch.nn.Module
+    nb_points: int,
+    curve: torch.Tensor,
+    h: torch.Tensor,
+    decoder: torch.nn.Module,
 ) -> torch.Tensor:
-    y = torch.zeros_like(X)
-    y[:, 0, :] = X[:, 0, :]
+    if nb_points < 2:
+        raise ValueError("At least 2 points should be generated.")
 
-    h = encoder(X)
-    x = y[:, 0, :]
-    x = x[:, None, :]
+    y = torch.zeros(
+        (h.shape[0], nb_points, curve.shape[2]), device=curve.device
+    )
+    n_given = curve.shape[1]
+    y[:, :n_given, :] = curve
 
+    x = y[:, :n_given, :]
     x, cache = decoder(x, h)
-    y[:, 1, :] = x[:, 0, :].detach()
+    y[:, n_given, :] = x[:, n_given - 1, :].detach()
 
-    for i in range(1, X.shape[1]-1):
-        x = y[:, i, :]
-        x = x[:, None, :]
-
+    for i in range(n_given, nb_points - n_given - 1):
+        x = y[:, i, :][:, None, :]
         x, cache = decoder(x, cache=cache)
-        y[:, i+1, :] = x[:, 0, :].detach()
+        y[:, i + 1, :] = x[:, 0, :].detach()
 
     return y

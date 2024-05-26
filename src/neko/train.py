@@ -1,5 +1,6 @@
 import torch
 from tqdm import tqdm
+from pathlib import Path
 from loguru import logger
 from torch.utils.data import DataLoader
 
@@ -13,8 +14,17 @@ def train(
     device: str,
     chunks: int = 10,
     batch_size: int = 32,
-    nb_epochs: int = 4
+    nb_epochs: int = 4,
 ):
+    logger.info(
+        f"Begin training with following parameters: device={device}, "
+        f"chunks={chunks}, batch_size={batch_size}, nb_epochs={nb_epochs}."
+    )
+    checkpoints_dir = (
+        Path(__file__).parent.parent.parent / "data" / "out" / "checkpoints"
+    )
+    checkpoints_dir.mkdir(parents=True, exist_ok=True)
+
     dataloader = DataLoader(
         dataset=data,
         batch_size=batch_size,
@@ -24,22 +34,23 @@ def train(
         multiprocessing_context=None,
     )
 
+    # checkpoint_path = checkpoints_dir / "epoch8.pth"
+    # checkpoints = torch.load(checkpoint_path, map_location="cpu")
+    # encoder.load_state_dict(checkpoints["encoder_state_dict"])
+    # decoder.load_state_dict(checkpoints["decoder_state_dict"])
+
     encoder.train()
     decoder.train()
     encoder.to(device)
     decoder.to(device)
 
     criterion = torch.nn.MSELoss()
-    optimizer1 = torch.optim.AdamW(
-        encoder.parameters(),
+    optimizer = torch.optim.AdamW(
+        list(encoder.parameters()) + list(decoder.parameters()),
         lr=1e-3,
         weight_decay=1e-3,
     )
-    optimizer2 = torch.optim.AdamW(
-        decoder.parameters(),
-        lr=1e-3,
-        weight_decay=1e-3,
-    )
+    # optimizer.load_state_dict(checkpoints["optimizer_state_dict"])
 
     for epoch in range(nb_epochs):
         epoch_loss = 0.0
@@ -51,18 +62,17 @@ def train(
             unit="batch",
             colour="green",
             mininterval=10,
-            maxinterval=60
+            maxinterval=60,
         ):
-            optimizer1.zero_grad()
-            optimizer2.zero_grad()
+            optimizer.zero_grad()
 
             X = X.to(device)
             y = X.clone().detach()
 
             seq = X.shape[1] // chunks
             for chunk in range(chunks):
-                X1 = X[:, chunk * seq: (chunk+1) * seq, :]
-                y1 = y[:, chunk * seq: (chunk+1) * seq, :]
+                X1 = X[:, chunk * seq : (chunk + 1) * seq, :]
+                y1 = y[:, chunk * seq : (chunk + 1) * seq, :]
                 y1 = y1[:, 1:, :]
                 X1 = X1[:, :-1, :]
 
@@ -75,8 +85,7 @@ def train(
                 cur_loss += loss_value
                 loss.backward()
 
-            optimizer1.step()
-            optimizer2.step()
+            optimizer.step()
             nb_steps += 1
 
             if nb_steps % 10 == 0:
@@ -85,4 +94,18 @@ def train(
                 cur_loss = 0
 
         running_loss = epoch_loss / nb_steps
-        logger.info(f"Epoch {epoch+1}/{nb_epochs}, loss: {running_loss}.")
+        logger.info(f"Epoch {epoch + 1}/{nb_epochs}, loss: {running_loss}.")
+
+        # checkpoint_path = checkpoints_dir / f"epoch{epoch + 1 + 8}.pth"
+        # torch.save(
+        #     {
+        #         "epoch": epoch + 1 + 8,
+        #         "encoder_state_dict": encoder.state_dict(),
+        #         "decoder_state_dict": decoder.state_dict(),
+        #         "optimizer_state_dict": optimizer.state_dict(),
+        #         "loss": {running_loss},
+        #     },
+        #     checkpoint_path.as_posix(),
+        # )
+
+    logger.info("Training ended successfully.")
