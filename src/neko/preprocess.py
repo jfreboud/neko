@@ -3,6 +3,12 @@ import torch
 
 
 class Preprocess(torch.nn.Module):
+    """
+    A preprocessing class to prepare ECGs before feeding them
+    to a deep learning model.
+    I copied this class from the internet.
+    """
+
     def __init__(
         self,
         normalize,
