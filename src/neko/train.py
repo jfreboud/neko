@@ -89,22 +89,33 @@ def train(
             X = X.to(device)
             y = X.clone().detach()
 
+            # Split the original signal into chunks in order
+            # to lower memory consumption (see reasoning in the README.md).
             seq = X.shape[1] // chunks
             for chunk in range(chunks):
                 X1 = X[:, chunk * seq : (chunk + 1) * seq, :]
                 y1 = y[:, chunk * seq : (chunk + 1) * seq, :]
-                y1 = y1[:, 1:, :]
-                X1 = X1[:, :-1, :]
 
-                x1 = encoder(X1)
-                x1, _ = decoder(X1, x1)
+                # The ground truth is the input signal but in the "future".
+                y1 = y1[:, 1:, :]  # the ground truth
+                X1 = X1[:, :-1, :]  # the input signal
 
+                x1 = encoder(X1)  # compute the style vector
+                x1, _ = decoder(X1, x1)  # generate new points
+
+                # Compare new points to ground truth.
+                # Divide by number of chunks because the gradient
+                # is accumulated.
                 loss = criterion(x1, y1) / chunks
                 loss_value = loss.item()
+
                 epoch_loss += loss_value
                 cur_loss += loss_value
+
+                # Accumulate gradient (do not call zero_grad).
                 loss.backward()
 
+            # Update parameters.
             optimizer.step()
             nb_steps += 1
 
