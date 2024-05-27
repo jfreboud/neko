@@ -230,53 +230,23 @@ We may compare them to the ground truth.
         <td>Generated patient A lead 1</td>
         <td>Ground truth patient A lead 1</td>
     </tr>
+    <tr>
+        <td><img src="data/in/pat3_lead1.png"></td>
+        <td><img src="data/in/pat3_lead1_truth.png"></td>
+    </tr>
+    <tr>
+        <td>Generated patient B lead 1</td>
+        <td>Ground truth patient B lead 1</td>
+    </tr>
+    <tr>
+        <td><img src="data/in/pat3_lead3.png"></td>
+        <td><img src="data/in/pat3_lead3_truth.png"></td>
+    </tr>
+    <tr>
+        <td>Generated patient B lead 3</td>
+        <td>Ground truth patient B lead 3</td>
+    </tr>
 </table>
-
-<figure>
-  <img src="data/in/pat4_lead1.png"/>
-  <figcaption>
-  Generated curve patient A lead 1
-  </figcaption>
-</figure>
-
-<figure>
-  <img src="data/in/pat4_lead1_truth.png"/>
-  <figcaption>
-  Ground truth patient A lead 1
-  </figcaption>
-</figure>
-
-<br>
-
-<figure>
-  <img src="data/in/pat3_lead1.png"/>
-  <figcaption>
-  Generated curve patient B lead 1
-  </figcaption>
-</figure>
-
-<figure>
-  <img src="data/in/pat3_lead1_truth.png"/>
-  <figcaption>
-  Ground truth patient B lead 1
-  </figcaption>
-</figure>
-
-<br>
-
-<figure>
-  <img src="data/in/pat3_lead3.png"/>
-  <figcaption>
-  Generated curve patient B lead 3
-  </figcaption>
-</figure>
-
-<figure>
-  <img src="data/in/pat3_lead3_truth.png"/>
-  <figcaption>
-  Ground truth patient B lead 3
-  </figcaption>
-</figure>
 
 Let us begin with some sanity checks:
 - the generated curve for patient A lead 1
