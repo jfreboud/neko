@@ -1,10 +1,15 @@
 <h1 align="center">
-  <sub>Neko Challenge II</sub>
+  <sub>Neko Challenge</sub>
   <br>
   ECG representations
 </h1>
 
 <!-- TOC -->
+  * [Part1: ML pipeline for cardiovascular risk assessment](#part1-ml-pipeline-for-cardiovascular-risk-assessment)
+    * [Preliminary Considerations](#preliminary-considerations)
+    * [Unsupervised Learning](#unsupervised-learning)
+    * [Supervised Learning](#supervised-learning)
+  * [Part2: algorithm for unsupervised electrocardiogram interpretation](#part2-algorithm-for-unsupervised-electrocardiogram-interpretation)
   * [Installation and Setup](#installation-and-setup)
     * [Installation](#installation)
     * [Setup](#setup)
@@ -19,25 +24,97 @@
   * [Next Steps](#next-steps)
 <!-- TOC -->
 
+## Part1: ML pipeline for cardiovascular risk assessment
+
+### Preliminary Considerations
+
 The goal of this repository is to work in the field of ECG in an unsupervised manner.
-In a way, we want to summarize / encode the content of timeline series.
-From there it will be possible to:
+An interesting characteristic of the ECGs is their continuity through time.
 
-1. explore a dataset of ECGs effectively
-   1. create partitions of patients
-   2. find correlations with other clinical signals
-   3. example:
-are the patients in the same cluster frequently associated with overweight?
+In general, clinical data appear as structured but scattered data. \
+Structured because the value they contain can be easily "understood" by a
+machine as simple number. \
+Scattered because they suffer from many problem of missing values,
+missing units, conversion, interpretation...
 
-2. impact on patient: predict cardio vascular condition
-   1. mixing with clinician expertise, labels could help in building
-an AI classifier on top of the previous unsupervised representations
+An image on the other hand is something that is not structured by itself.
+A machine struggles to understand what the image is. We have to build
+deep learning models that can progressively build patterns in order to
+capture the different relevant pieces of information in the image. \
+A human or machine annotator may miss classify an image,
+but the signal of the image itself remains uncorrupted. \
+Unsupervised learning tries to capture the inherent signal that make up
+the image.
 
-3. loop back to enhance the quality of data (also with clinician labels)
-   1. train a model to detect ECGs of good quality
-   2. challenge the current data: discard bad samples
-   3. data creation routine:
-ask for a new ECG creation upon detecting bad quality
+We can compare the image use case to the ECG timeseries: ECG are images in 1D.
+Now let consider the difficulty of recording an ECG:
+we need a process and machines. The whole pipeline may suffer from
+miss calibration, there may be sensibility issues. \
+As we will see later, a model that would understand
+the signal itself in an unsupervised manner could help detect problems of
+quality in the data itself and thus resolve the problem of calibration for
+example.
+
+Another thing to consider is the shape of the ECGs through time.
+They tend to shift and are not cleanly centered around 0.
+In deep learning models, much
+research has been involved in normalization layers, showing the importance
+of having defined ranges of centered values.
+As such it would be interesting to consider proper preprocessing before
+feeding the ECG to any deep learning model.
+
+### Unsupervised Learning
+
+Before proposing a method to train a model to capture the signal of an ECG,
+let us figure out the value of such a model. In the following, this model
+will be called the encoder.
+
+This encoder can be used to structure a dataset of patients
+for whom we have recorded ECGs.
+Using an algorithm such as K means clustering, we may create partitions of
+ECGs where the different ECGs in the same cluster are expected to share
+similarities in regard of the features that have been extracted by the
+encoder.
+As the ECGs seem relevant to contain information about cardiovascular risk,
+it should be possible to find clusters where patients share some
+cardiovascular bad condition. We could use a clinical data such as
+"total cholesterol" to find these clusters because "total cholesterol"
+is known to be correlated with bad cardiovascular condition. \
+Then, with the ANOVA method, it could be possible to
+estimate whether the average of "total cholesterol" could be
+significantly different in some clusters. Some statistical analysis can
+be performed to check whether other clinical data have an abnormal
+distribution inside the marked clusters. This could indicate other clinical
+data that are correlated with bad cardiovascular risk. All this should
+be discussed with clinicians to find and have a guess at the different
+clinical data to collect.
+
+We can use t-SNE on the `features` extracted by the encoder. Thanks to this method,
+it could be possible to visualize the proximity of different ECGs and find outliers.
+Then, with cosine similarity distance on the `features`,
+we can find other ECGs with the same problem. These outliers may indicate
+cardiac risk but also ECG of bad quality.
+
+At some point, we will need clinicians expertise to annotate the different
+ECGs. Once more, the encoder may prove useful with methods like active learning
+to make suggestions on the next best samples to annotate.
+The best samples could represent ECGs for which the
+extracted `features` are far from the `features` that have already been
+annotated. This process may be long to initialize because it would need
+to iterate on the methodology, create user interface and interact a lot
+with clinicians. In the long run, those process will enable continuous
+monitoring and feedback.
+
+### Supervised Learning
+
+Finally, the encoder will serve as the backbone to train classifiers
+of cardiovascular risk.
+
+Also note that in the end it would be preferable to train a model that relies
+on the least
+
+
+## Part2: algorithm for unsupervised electrocardiogram interpretation
 
 ## Installation and Setup
 
