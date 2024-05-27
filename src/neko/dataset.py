@@ -4,7 +4,7 @@ import pandas
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Optional
 from torch.utils.data import Dataset
 
 from neko.preprocess import Preprocess
@@ -12,16 +12,17 @@ from neko.preprocess import Preprocess
 
 class ECGDataset(Dataset):
     """
-    A dataset of labeled images.
+    A dataset of ECGs.
 
     Parameters
     ----------
-    directories: [str]
-        List of directories which correspond to actual slide with annotations.
-    label: int
-        The label to select inside the different slide directories.
-    transform
-        The transform to operate on each image.
+    path: Path
+        Path to the data on the disk.
+    sampling_rate: int
+        The sampling rate of the ECGs.
+    df: pandas.DataFrame
+        Dataframe used to create a dataset instead of
+        going through the `path` normal API.
     """
 
     def __init__(
@@ -43,6 +44,19 @@ class ECGDataset(Dataset):
             self.df = pd.read_csv(path, index_col="ecg_id")
 
     def filter(self, indices: np.ndarray) -> "ECGDataset":
+        """
+        Filter out some ECGs of the current dataset and create a new one.
+
+        Parameters
+        ----------
+        indices: np.ndarray
+            Array of indices to keep in the current dataset.
+
+        Returns
+        -------
+        _: ECGDataset
+            The created new dataset with `indices` lines.
+        """
         df = self.df.iloc[indices]
         return ECGDataset(
             path=self.path, sampling_rate=self.sampling_rate, df=df
@@ -54,9 +68,9 @@ class ECGDataset(Dataset):
         """
         return len(self.df)
 
-    def __getitem__(self, item: int) -> Tuple[torch.Tensor, str]:
+    def __getitem__(self, item: int) -> torch.Tensor:
         """
-        Get some element in the dataset.
+        Get some sample in the dataset.
 
         Parameters
         ----------
@@ -65,7 +79,9 @@ class ECGDataset(Dataset):
 
         Returns
         -------
-        A tensor containing the image loaded and transformed.
+        X: torch.Tensor
+            The preprocessed ECG tensor of shape (1, nb_lead)
+            where nb_lead = 12.
         """
         if self.sampling_rate == 100:
             data, _ = wfdb.rdsamp(

@@ -15,7 +15,7 @@ from config import TEST_FOLDS, MODEL_ARGS, ModelComplexity
 
 def main_eval(
     database_path: Annotated[
-        Path, typer.Option("--db", help="Path to the PTXL database.")
+        Path, typer.Option("--db", help="Path to the PTB-XL database.")
     ],
     encoder_path: Annotated[
         Path,
@@ -34,6 +34,22 @@ def main_eval(
         ModelComplexity, typer.Option("--model", help="Model config to run.")
     ],
 ):
+    """
+    Entry point for evaluating the encoder quality.
+
+    Parameters
+    ----------
+    database_path: Path
+        Path to the PTB-XL database (in fact a file).
+    encoder_path: Path
+        Path to load the encoder from the disk.
+    decoder_path: Path
+        Path to load the decoder from the disk.
+    device: str
+        Device used to train the models.
+    model_config: ModelComplexity
+        Model config to run.
+    """
     logger.info(
         f"Main eval launched with following parameters: device={device}, "
         f"model_config={model_config}."

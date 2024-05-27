@@ -16,6 +16,26 @@ def train(
     batch_size: int = 32,
     nb_epochs: int = 4,
 ):
+    """
+    Train an encoder and decoder end to end in a generative way.
+
+    Parameters
+    ----------
+    data: ECGDataset
+        Dataset of ECGs.
+    encoder: Path
+        Encoder model to train.
+    decoder: Path
+        Decoder model to train.
+    device: str
+        Device used to train the models.
+    chunks: int
+        Number of split of each ECG in order to limit memory consumption.
+    batch_size: int
+        Batch size for training.
+    nb_epochs: int
+        Number of epochs for training.
+    """
     logger.info(
         f"Begin training with following parameters: device={device}, "
         f"chunks={chunks}, batch_size={batch_size}, nb_epochs={nb_epochs}."

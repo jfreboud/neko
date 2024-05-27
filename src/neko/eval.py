@@ -17,6 +17,28 @@ def eval(
     chunks: int = 10,
     batch_size: int = 32,
 ):
+    """
+    Evaluate an encoder quality.
+    The goal is to compare:
+        original ECG
+            to
+        ECG -> encoder -> decoder.
+
+    Parameters
+    ----------
+    data: ECGDataset
+        Dataset of ECGs.
+    encoder: Path
+        Encoder model to test.
+    decoder: Path
+        Decoder model to run.
+    device: str
+        Device used to train the models.
+    chunks: int
+        Number of split of each ECG in order to limit memory consumption.
+    batch_size: int
+        Batch size for training.
+    """
     logger.info(
         f"Begin eval with following parameters: device={device}, "
         f"chunks={chunks}, batch_size={batch_size}."

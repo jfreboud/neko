@@ -7,6 +7,27 @@ def generate(
     h: torch.Tensor,
     decoder: torch.nn.Module,
 ) -> torch.Tensor:
+    """
+    Generate an ECG out of a style vector.
+
+    Parameters
+    ----------
+    nb_points: int
+        Number of points of the ECG to generate.
+    curve: int
+        Curve given as a context to make the generation
+        (like the prompt of LLM).
+    h: torch.Tensor
+        Hidden features of shape (B, hidden): the style vector.
+    decoder: torch.nn.Module
+        The decoder model.
+
+    Returns
+    -------
+    y: torch.Tensor
+        The generated curve of shape (B, nb_points, nb_lead) where
+        nb_lead = 12.
+    """
     if nb_points < 2:
         raise ValueError("At least 2 points should be generated.")
 
