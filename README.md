@@ -170,16 +170,35 @@ makes memory grow along o(N^2) of `seq` dimension.
 ### Training
 
 The small model config has been trained for 4 epochs.
-It lasted around 2 hours on a MacBook with M3Max.
+It lasted around 2 hours on a MacBook Pro with M3Max (64Gb of RAM).
+It took around 3.4s per batch which seems a lot.
+A batch was composed of 32 ECGs of 10s, split 10 times, hence a virtual
+batch size of 320 with gradient accumulation.
+An epoch was composed of 409 batches (4090 virtual batches with the previous remark).
 The loss came from 1.816 to 0.056 but did not converge yet.
+
+Here are some loggings corresponding to this training.
 
 <figure>
 <img src="data/in/small_4epochs.png">
 <figcaption>Training small encoder and decoder for 4 epochs</figcaption>
 </figure>
 
-The large model config has been trained for 12 epochs.
-Its final loss was 0.028, this model did not converge either.
+Below is a summary of the different trainings I tested:
+- the MacBook Pro M3Max I mentioned earlier
+- a MacBook Pro Intel connected to an AMD Radeon 6900XT with 16Gb of RAM
+- a NVIDIA T4 with 32Gb of RAM
+
+| Models config | GPU    | nb epochs | batch size | time per batch | final MSE    |
+|---------------|--------|-----------|------------|----------------|--------------|
+| small         | M3Max  | 4         | 32 (x10)   | 3.4s           | 1.816->0.056 |
+| large         | 6900XT | 12        | 32 (x10)   | 4.7s           | 0.028        |
+| small         | T4     | 0         | 32 (x10)   | ~8s            | ?            |
+
+In particular it is interesting to note that the large model took more epochs
+to reach same level of MSE as the small one (around 8 epochs).
+An idea could be to test training the big model with
+[LoRA](https://medium.com/@Shrishml/lora-low-rank-adaptation-from-the-first-principle-7e1adec71541).
 
 ### Some Sanity Checks
 
