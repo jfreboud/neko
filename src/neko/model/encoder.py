@@ -92,6 +92,10 @@ class Bottleneck(torch.nn.Module):
 @dataclass
 class ResNetArgs:
     """
+    ResNet parameters.
+
+    Parameters
+    ----------
     planes: [int]
         List of outgoing depth for the different blocks.
     blocks: [int]

@@ -98,7 +98,7 @@ The 2 models are trained end to end in a generative way.
 To launch the training, go to the `src/script` subdirectory and execute the command:
 
 ```shell
-python train.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3/ptbxl_database.csv --encoder ../../weights/encoder.pt --decoder ../../weights/decoder.pt --device mps --model small
+python train.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3/ptbxl_database.csv --encoder ../../weights/small/encoder.pt --decoder ../../weights/small/decoder.pt --device mps --model small
 ```
 
 `--db`: the input dataset of ECGs. \
@@ -113,7 +113,7 @@ In order to evaluate the quality of the encoder model,
 go to the `src/script` subdirectory and execute the command:
 
 ```shell
-python eval.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3/ptbxl_database.csv --encoder ../../weights/encoder.pt --decoder ../../weights/decoder.pt --device mps --model small
+python eval.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3/ptbxl_database.csv --encoder ../../weights/small/encoder.pt --decoder ../../weights/small/decoder.pt --device mps --model small
 ```
 
 `--db`: the input dataset of ECGs. \
