@@ -1,4 +1,4 @@
-# This class has been inspired by torchvision's ResNet implementation.
+# This file has been inspired by torchvision's ResNet implementation.
 # The goal was to globally use as is with minor change to adapt to the
 # timeseries domain, simplifying also a bit.
 # Especially, I kept the vocabulary of planes which would fit better to

@@ -1,4 +1,4 @@
-# This class has been inspired by Mistral 7B model implementation.
+# This file has been inspired by Mistral 7B model implementation.
 
 import torch
 from dataclasses import dataclass
