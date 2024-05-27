@@ -5,11 +5,13 @@
 </h1>
 
 <!-- TOC -->
-  * [Installation](#installation)
+  * [Installation and Setup](#installation-and-setup)
+    * [Installation](#installation)
+    * [Setup](#setup)
   * [Getting Started](#getting-started)
     * [Train an Encoder and a Decoder](#train-an-encoder-and-a-decoder)
     * [Evaluate the Encoder](#evaluate-the-encoder)
-  * [Personal Wandering](#personal-wandering)
+  * [Investigation](#investigation)
   * [Results](#results)
     * [Training](#training)
     * [Some Sanity Checks](#some-sanity-checks)
@@ -37,12 +39,14 @@ an AI classifier on top of the previous unsupervised representations
    3. data creation routine:
 ask for a new ECG creation as soon as possible when quality is bad
 
-## Installation
+## Installation and Setup
+
+### Installation
 
 [![](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/)
 
 The following instructions are useful to install the `neko` library in a python environment.
-Currently, `neko` supports Python 3.9.
+Currently, `neko` supports Python 3.9 and above (but I did not check more recent versions).
 
 Create a virtual environment and install `poetry`:
 
@@ -58,13 +62,27 @@ Go to the `src` subdirectory and install the `neko` library:
 poetry install
 ````
 
+### Setup
+
+Download the [PTB-XL](https://www.physionet.org/content/ptb-xl/1.0.3/)
+dataset to end up with a directory
+`~/Downloads/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3`.
+
+Any other location is also possible but the `--db` parameter will have
+to be updated in further commands.
+
 ## Getting Started
 
-Be sure to be in the `neko` conda environment (see [previous paragraph](#installation)):
+Be sure to be in the `neko` conda environment and to have downloaded the PTB-XL
+dataset somewhere (see [previous paragraph](#installation)).
 
-```shell
-conda activate neko
-```
+Also note that the subdirectory weights already contains some weights that
+have been trained with the `small` config of the different models
+(see paragraph [Training](#training)).
+
+That way, it is already possible to test the [Evaluate the Encoder](#evaluate-the-encoder)
+paragraph without having to actually [Train an Encoder and a Decoder](#train-an-encoder-and-a-decoder)
+first.
 
 ### Train an Encoder and a Decoder
 
@@ -108,7 +126,7 @@ The command will encode the style of the input ECGs and then decode the style
 in order to generate an ECG.
 Ideally the generated ECG should be the same as the original one.
 
-## Personal Wandering
+## Investigation
 
 I began testing the `example_physionet.py` file in order to look at the shape of
 the 12-lead electrocardiograms:
