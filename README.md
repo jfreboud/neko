@@ -17,6 +17,26 @@
   * [Next Steps](#next-steps)
 <!-- TOC -->
 
+The goal of this repository is to work on the field of ECG in an unsupervised manner.
+In a way, we want to summarize / encode the content of timeline series.
+From there it will be possible to:
+
+1. explore a dataset of ECGs effectively
+   1. create partitions of patients
+   2. find correlations with other clinical signals
+   3. one question could be:
+are the patients in the same cluster frequently associated with overweight?
+
+2. mixing with clinician expertise, labels could help in building
+an AI classifier on top of the previous unsupervised representations
+   1. impact on patient: predict cardio vascular condition
+
+3. loop back to enhance the quality of data (also with clinician labels)
+   1. train a model to detect ECGs of good quality
+   2. challenge the current data: discard bad samples
+   3. data creation routine:
+ask for a new ECG creation as soon as possible when quality is bad
+
 ## Installation
 
 [![](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/downloads/)
