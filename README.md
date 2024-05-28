@@ -65,7 +65,7 @@ In the [second part](#part2-algorithm-for-unsupervised-electrocardiogram-interpr
 we will present a method to train a model to capture
 the inherent signal of an ECG in an unsupervised way.
 This model will be called the encoder.
-In the meanwhile, let us figure out the value of such en encoder.
+In the meanwhile, let us figure out the value of such an encoder.
 
 First, the encoder can be used to structure a dataset of patients
 for whom we have recorded ECGs. \
@@ -78,30 +78,41 @@ it should be possible to find clusters where patients share some
 cardiovascular bad condition. For that, we could use a clinical biomarker such as
 "total cholesterol" because it is known to be correlated
 with bad cardiovascular condition. \
-Then, with the ANOVA method, it could be possible to
-estimate whether the average of "total cholesterol" could be
-significantly different in some clusters. Some statistical analysis can
-be performed to check whether other clinical data have an abnormal
-distribution inside the marked clusters. This could indicate other clinical
-data that are correlated with bad cardiovascular risk. All this should
-be discussed with clinicians to find and have a guess at the different
+Then, with the ANOVA method, it should be possible to
+estimate whether the average of "total cholesterol" is
+significantly different in some clusters.
+Some statistical analysis can be performed on those clusters of interest
+to find other clinical data that have abnormal distributions compared
+to the other clusters. These clinical data also become of high interest
+to mark bad cardiovascular risk. All this should
+be discussed with clinicians in order to settle on set of
 clinical data to collect.
 
-We can use t-SNE on the `features` extracted by the encoder. Thanks to this method,
+Then, we can use t-SNE on the `features` extracted by the encoder. Thanks to this method,
 it could be possible to visualize the proximity of different ECGs and find outliers.
-Then, with cosine similarity distance on the `features`,
-we can find other ECGs with the same problem. These outliers may indicate
-cardiac risk but also ECG of bad quality.
+With cosine similarity distance on the `features`,
+we can find other ECGs that share the same characteristics.
+These outliers may indicate cardiac risk but also ECG of bad quality.
 
-At some point, we will need clinicians expertise to annotate the different
-ECGs. Once more, the encoder may prove useful with methods like active learning
+At some point, we will need clinicians' expertise to annotate the different
+ECGs. The annotations will be about the content: what can I see in the ECG
+as a specialist of health. This information will be precious in
+a [training a supervised classifier](#supervised-learning).
+But the annotations should also be about the quality of the data itself.
+This may help curating the existing database but also create a routine to
+re record ECG as soon as possible. \
+Once more, the encoder is useful to foster effective annotation process
+with the help of active learning
 to make suggestions on the next best samples to annotate.
 The best samples could represent ECGs for which the
 extracted `features` are far from the `features` that have already been
-annotated. This process may be long to initialize because it would need
+annotated. \
+This process may be long to initialize because it would need
 to iterate on the methodology, create user interface and interact a lot
-with clinicians. In the long run, those process will enable continuous
-monitoring and feedback.
+with clinicians. It will enable continuous
+monitoring and feedback that will eventually fuel a solid database of
+ECGs. From there it will be possible to retrain the encoder and lead to
+a virtuous circle.
 
 ## Supervised Learning
 
