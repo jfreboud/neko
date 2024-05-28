@@ -229,8 +229,8 @@ more on that [later](#generation-from-style).
 First, let us test the `example_physionet.py` file in order to look at the shape of
 the 12-lead electrocardiograms:
 - 12 different timeseries that are sampled at 100Hz or 500Hz
-- in the following, let us focus on the 100Hz ECGs which are shorter
-- the timeseries not cleanly centered around 0, we will need some preprocessing.
+- in the following, we will focus on the 100Hz ECGs that are shorter
+- the timeseries are not cleanly centered around 0, we will need some preprocessing.
 
 Then, the difficulty is to find a way to train the encoder in an
 unsupervised way.
@@ -241,38 +241,40 @@ and negative `features` from patient B
 2. learn that the anchor and positive `features` should be similar while
 the anchor and the negative `features` should not.
 
-We can also consider
+We can also think of
 [styleGAN](https://cv-tricks.com/how-to/understanding-stylegan-for-image-generation-using-deep-learning/amp/).
 The 12-lead timeseries of the ECG could be modulated by the `features` of the
 encoder that would act as the style vector.
-This seems relevant because:
+We could even leverage generative learning and build an interpretable system:
 1. a generative learning approach could train the models more effectively than GANs
-2. the system would be interpretable: the features' vector (the style)
+2. the `features` (the style)
 could be reversed into timeseries that are in the domain of clinicians
-3. if the features' vector can be reversed / decoded, it is also possible to explore
-small modifications of the style
+3. it would be possible to explore the impact of small modifications of the style
 
-In order to implement this idea, let us figure out a way to make the style vector
-distill information to the different layers of the decoder. This is
-already what the `Transformers` do in the `Attention` layers.
-Thus, the style vector may be concatenated before the start of
+In order to implement this idea, we must find a way to make the style vector
+distill time-aware information to the different layers of the decoder.
+In fact, this is
+already what the `Transformers` do in the `Attention` layers thanks to the
+`queries` and `values`.
+Therefore, the style vector may be concatenated before the start of
 the `sequential` axis and the model will learn how to use it the best way.
 
 Another problem is to limit memory consumption during the training.
 In order to do so, let us split the different timeseries in 10 chunks of 1s each.
 This is because the computation of the attention `scores`
-makes memory grow o(N^2) of `sequential` dimension.
+makes memory grow o(N^2) of the `sequential` dimension.
 
 ## Results
 
 ### Training
 
-The small model config has been trained for 4 epochs.
-It lasted around 2 hours on a MacBook Pro with M3Max (64Gb of RAM).
+A small model config (referring to a small encoder and decoder version)
+has been trained for 4 epochs.\
+It lasted around 2 hours on a MacBook Pro with M3Max.\
 It took around 3.4s per batch which seems a lot.\
 A batch is composed of 32 ECGs of 10s, split 10 times, hence a virtual
 batch size of 320 with gradient accumulation.\
-An epoch is composed of 409 batches (4090 virtual batches with the previous remark).
+An epoch is composed of 409 batches (virtually 4090).
 The loss came from 1.816 to 0.056 but the model could converge more.
 
 Here is some logging corresponding to the previous training.
