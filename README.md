@@ -1,7 +1,7 @@
 <h1 align="center">
   <sub>Neko Challenge</sub>
   <br>
-  ECG for cardiovascular risk assessment
+  ECGs for cardiovascular risk assessment
 </h1>
 
 <!-- TOC -->
@@ -28,58 +28,56 @@
 
 ## Preliminary Considerations
 
-The goal of this repository is to work in the field of ECG in an unsupervised manner.
+The goal of this repository is to work in the field of ECGs in an unsupervised manner.
 An interesting characteristic of the ECGs is their continuity through time.
 
 In general, clinical data appear as structured but scattered data. \
 Structured because the value they contain can be easily "understood" by a
-machine as simple number. \
-Scattered because they suffer from many problem of missing values,
+machine as a simple number. \
+Scattered because they suffer from many problems: missing values,
 missing units, conversion, interpretation...
 
 An image on the other hand is something that is not structured by itself.
-A machine struggles to understand what the image is. We have to build
-deep learning models that can progressively build patterns in order to
-capture the different relevant pieces of information in the image. \
+A machine struggles to understand what the image is about. We have to build
+deep learning models that can progressively find patterns in order to
+capture the relevant pieces of information to structure this data. \
 A human or machine annotator may miss classify an image,
 but the signal of the image itself remains uncorrupted. \
 Unsupervised learning tries to capture the inherent signal that make up
 the image.
 
-We can compare the image use case to the ECG timeseries: ECG are images in 1D.
+We can compare ECG timeseries to the image use case: ECGs are images in 1D.
 Now let consider the difficulty of recording an ECG:
-we need a process and machines. The whole pipeline may suffer from
-miss calibration, there may be sensibility issues. \
-As we will see later, a model that would understand
-the signal itself in an unsupervised manner could help detect problems of
-quality in the data itself and thus resolve the problem of calibration for
-example.
+we need processes and machines. The whole pipeline may suffer from
+miss calibration, sensibility issues.
 
 Another thing to consider is the shape of the ECGs through time.
 They tend to shift and are not cleanly centered around 0.
 In deep learning models, much
 research has been involved in normalization layers, showing the importance
 of having defined ranges of centered values.
-As such it would be interesting to consider proper preprocessing before
+As such, it would be interesting to consider proper preprocessing before
 feeding the ECG to any deep learning model.
 
 ## Unsupervised Learning
 
-Before proposing a method to train a model to capture the signal of an ECG,
-let us figure out the value of such a model. In the following, this model
-will be called the encoder.
+In the [second part](#part2-algorithm-for-unsupervised-electrocardiogram-interpretation),
+we will present a method to train a model to capture
+the inherent signal of an ECG in an unsupervised way.
+This model will be called the encoder.
+In the meanwhile, let us figure out the value of such en encoder.
 
-This encoder can be used to structure a dataset of patients
-for whom we have recorded ECGs.
+First, the encoder can be used to structure a dataset of patients
+for whom we have recorded ECGs. \
 Using an algorithm such as K means clustering, we may create partitions of
 ECGs where the different ECGs in the same cluster are expected to share
-similarities in regard of the features that have been extracted by the
-encoder.
+similarities in regard of the `features` that have been extracted by the
+encoder.\
 As the ECGs seem relevant to contain information about cardiovascular risk,
 it should be possible to find clusters where patients share some
-cardiovascular bad condition. We could use a clinical data such as
-"total cholesterol" to find these clusters because "total cholesterol"
-is known to be correlated with bad cardiovascular condition. \
+cardiovascular bad condition. For that, we could use a clinical biomarker such as
+"total cholesterol" because it is known to be correlated
+with bad cardiovascular condition. \
 Then, with the ANOVA method, it could be possible to
 estimate whether the average of "total cholesterol" could be
 significantly different in some clusters. Some statistical analysis can
