@@ -171,9 +171,9 @@ dataset somewhere (see [previous paragraph](#installation)).
 
 Also note that the subdirectory `weights` already contains some weights that
 have been trained with the `small` config of the different models
-(see paragraph [Training](#training)).
+(see paragraph [training](#training)).
 
-That way, it is already possible to test the [evaluation](#evaluate-the-encoder)
+Hence, it is possible to run the [evaluation](#evaluate-the-encoder)
 without having to actually [train the models](#train-an-encoder-and-a-decoder)
 first.
 
@@ -181,13 +181,14 @@ first.
 
 Let us train the 2 models of our system: an encoder and a decoder.
 
-The encoder is trained to encode a temporal signal into a vector.
+The encoder is trained to encode a temporal signal into a vector.\
 The decoder is trained to decode a temporal signal out of a vector.
 
 The encoder model is our backbone. We will typically rely on it to create
-value with finetuning for future model applications.
-The decoder is the head that helps training the encoder. Plus, it will
-enable some interpretability features (see [later](#investigation)).
+the value we mentioned in the [first part](#part1-ml-pipeline-for-cardiovascular-risk-assessment).
+The decoder is the head that helps in training the encoder. Plus, it will
+enable some interpretability features
+(see the [investigation paragraph](#investigation)).
 
 The 2 models are trained end to end in a generative way.
 To launch the training, go to the `src/script` subdirectory and execute the command:
@@ -204,7 +205,7 @@ python train.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardio
 
 ### Evaluate the Encoder
 
-In order to evaluate the quality of the encoder model,
+In order to evaluate the quality of the encoder,
 go to the `src/script` subdirectory and execute the command:
 
 ```shell
@@ -217,8 +218,9 @@ python eval.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiog
 `--device`: the device used to run the models (eg: mps, cuda). \
 `--model`: the model config to run.
 
-The command will encode the style of the input ECGs and then decode the style
-in order to generate an ECG.
+The command will encode the style
+(we will talk about it in the [investigation paragraph](#investigation))
+of the input ECGs and then decode the style in order to generate a new ECG.
 Ideally the generated ECG should be the same as the original one,
 more on that [later](#generation-from-style).
 
@@ -227,23 +229,22 @@ more on that [later](#generation-from-style).
 First, let us test the `example_physionet.py` file in order to look at the shape of
 the 12-lead electrocardiograms:
 - 12 different timeseries that are sampled at 100Hz or 500Hz
-- in the following, let us focus on the 100Hz ECGs.
+- in the following, let us focus on the 100Hz ECGs which are shorter
+- the timeseries not cleanly centered around 0, we will need some preprocessing.
 
-In order to create patients' partitions, the plan is the following:
-1. for each patient, encode the 12-lead timeseries into features vectors
-2. run K means clustering on the previous vectors
-
-The principal difficulty seems to encode the features vectors.
+Then, the difficulty is to find a way to train the encoder in an
+unsupervised way.
 The triplet loss could be a solution:
-1. sample an anchor features' vector from patient A,
-a positive features' vector from the same patient A
-and a negative features' vector from patient B
-2. learn that the anchor and positive features should be similar while
-the anchor and the negative features should not.
+1. sample anchor `features` from patient A,
+positive `features` from another record of same patient A
+and negative `features` from patient B
+2. learn that the anchor and positive `features` should be similar while
+the anchor and the negative `features` should not.
 
-Let us consider
+We can also consider
 [styleGAN](https://cv-tricks.com/how-to/understanding-stylegan-for-image-generation-using-deep-learning/amp/).
-The 12-lead timeseries of the ECG could be modulated by the features vector previously mentioned.
+The 12-lead timeseries of the ECG could be modulated by the `features` of the
+encoder that would act as the style vector.
 This seems relevant because:
 1. a generative learning approach could train the models more effectively than GANs
 2. the system would be interpretable: the features' vector (the style)
