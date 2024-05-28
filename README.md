@@ -158,11 +158,11 @@ poetry install
 ### Setup
 
 Download the [PTB-XL](https://www.physionet.org/content/ptb-xl/1.0.3/)
-dataset to end up with a directory
+dataset to end up with a directory such as
 `~/Downloads/ptb-xl-a-large-publicly-available-electrocardiography-dataset-1.0.3`.
 
 Any other location is also possible but the `--db` parameter will have
-to be updated accordingly in further commands.
+to be updated accordingly in [future commands](#train-an-encoder-and-a-decoder).
 
 ## Getting Started
 
