@@ -29,7 +29,7 @@
 
 ## Preliminary Considerations
 
-The goal of this repository is to work in the field of ECGs in an unsupervised manner.
+The goal of this repository is to work on ECGs in an unsupervised manner.
 An interesting characteristic of the ECGs is their continuity through time.
 
 In general, clinical data appear as structured but scattered data. \
@@ -69,7 +69,7 @@ This model will be called the encoder.
 In the meanwhile, let us figure out the value of such an encoder.
 
 First, the encoder can be used to structure a dataset of patients
-for whom we have recorded ECGs. \
+from whom we have recorded ECGs. \
 Using an algorithm such as K means clustering, we may create partitions of
 ECGs where the different ECGs in the same cluster are expected to share
 similarities in regard of the `features` that have been extracted by the
@@ -82,11 +82,11 @@ with bad cardiovascular condition. \
 Then, with the ANOVA method, it should be possible to
 estimate whether the average of "total cholesterol" is
 significantly different in some clusters.
-Some statistical analysis can be performed on those clusters of interest
+Some statistical analysis can then be performed on those clusters of interest
 to find other clinical data that have abnormal distributions compared
-to the other clusters. These clinical data also become of high interest
+to the other clusters. These clinical data become of high interest
 to mark bad cardiovascular risk. All this should
-be discussed with clinicians in order to settle on set of
+be discussed with clinicians in order to settle on a set of
 clinical data to collect.
 
 Then, we can use t-SNE on the `features` extracted by the encoder. Thanks to this method,
@@ -110,7 +110,7 @@ extracted `features` are far from the `features` that have already been
 annotated.
 
 The data quality consideration may be the starting point to initialize
-a long term process between clinicians and data science:
+a long term process between clinicians and the data science team:
 iterate on the methodology, create user interface, visualize clusters.
 This will enable continuous
 monitoring and feedback to eventually fuel a solid database of
@@ -170,7 +170,7 @@ to be updated accordingly in [future commands](#train-an-encoder-and-a-decoder).
 Be sure to be in the `neko` conda environment and to have downloaded the PTB-XL
 dataset somewhere (see [previous paragraph](#installation)).
 
-Also note that the subdirectory `weights` already contains some weights that
+Also note that the subdirectory `weights` already contains parameters that
 have been trained with the `small` config of the different models
 (see paragraph [training](#training)).
 
@@ -219,9 +219,9 @@ python eval.py --db ~/Downloads/ptb-xl-a-large-publicly-available-electrocardiog
 `--device`: the device used to run the models (eg: mps, cuda). \
 `--model`: the model config to run.
 
-The command will encode the style
+The command will encode the `style`
 (we will talk about it in the [investigation paragraph](#investigation))
-of the input ECGs and then decode the style in order to generate a new ECG.
+of the input ECGs and then decode the `style` in order to generate a new ECG.
 Ideally the generated ECG should be the same as the original one,
 more on that [later](#generation-from-style).
 
@@ -245,19 +245,19 @@ the anchor and the negative `features` should not.
 We can also think of
 [styleGAN](https://cv-tricks.com/how-to/understanding-stylegan-for-image-generation-using-deep-learning/amp/).
 The 12-lead timeseries of the ECG could be modulated by the `features` of the
-encoder that would act as the style vector.
+encoder that would act as the `style` vector.
 We could even leverage generative learning and build an interpretable system:
 1. a generative learning approach could train the models more effectively than GANs
-2. the `features` (the style)
-could be reversed into timeseries that are in the domain of clinicians
-3. it would be possible to explore the impact of small modifications of the style
+2. the `features` (the `style` vector)
+could be decoded into timeseries that are in the domain of clinicians
+3. it would be possible to explore the impact of small modifications of the `style`
 
-In order to implement this idea, we must find a way to make the style vector
+In order to implement this idea, we must find a way to make the `style` vector
 distill time-aware information to the different layers of the decoder.
 In fact, this is
 already what the `Transformers` do in the `Attention` layers thanks to the
 `queries` and `values`.
-Therefore, the style vector may be concatenated before the start of
+Therefore, the `style` vector may be concatenated before the start of
 the `sequential` axis and the model will learn how to use it the best way.
 
 Another problem is to limit memory consumption during the training.
@@ -297,12 +297,12 @@ An idea could be to test training the large model with
 
 ### Some Sanity Checks
 
-When the style's vector contains only zeroes, the decoder generates a zero
+When the `style`'s vector contains only zeroes, the decoder generates a zero
 curve:
 
 <img src="data/in/zero.png">
 
-Given some style vector repeated in a batch, the generated curves of the 12-lead are
+Given some `style` vector repeated in a batch, the generated curves of the 12-lead are
 also repeated and each timeseries inside the 12-lead is different.
 
 ### Generation from Style
@@ -313,7 +313,7 @@ The decoder generates curves of shape `(B, seq_dim, 12)`. In order
 to match the training setting we will use `seq_dim = 10`.\
 During the generation process,
 the decoder starts with the zero point (`(B, 1, 12)` filled with 0)
-and the style vector of shape `(B, encoder_hidden_dim)`.\
+and the `style` vector of shape `(B, encoder_hidden_dim)`.\
 We can check that the different generated curves below
 do start from 0 while the ground truth do not.
 
